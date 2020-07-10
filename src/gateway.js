@@ -1,10 +1,10 @@
 const { execSync } = require( 'child_process' );
 const { exec } = require( 'child_process' );
 const envUtils = require( './env-utils' );
-const config = require( './configure' );
-const fs = require( 'fs' );
-const path = require( 'path' );
-const nc = require( 'netcat/client' );
+const config   = require( './configure' );
+const fs       = require( 'fs' );
+const path     = require( 'path' );
+const nc       = require( 'netcat/client' );
 
 // Tracks if we've started global inside of this session
 let started = false;
@@ -20,7 +20,7 @@ const ensureNetworkExists = function() {
 
         console.log( ' - Creating network' );
         // --ip-range is only half of the subnet, so that we have a bunch of addresses in front to assign manually
-        execSync( 'docker network create wplocaldocker --subnet=10.0.0.0/16 --gateway 10.0.0.1 --ip-range 10.0.128.0/17' );
+        execSync( 'docker network create wplocaldocker --subnet=10.243.0.0/16 --gateway 10.243.0.1 --ip-range 10.243.128.0/17' );
     } catch ( ex ) {}
 };
 

@@ -6,13 +6,13 @@ services:
     image: andyshinn/dnsmasq
     cap_add:
       - NET_ADMIN
-    command: "-A /test/10.0.0.3 --log-facility=-"
+    command: "-A /test/10.243.0.3 --log-facility=-"
     ports:
         - "127.0.0.1:53:53/udp"
         - "127.0.0.1:53:53"
     networks:
       wplocaldocker:
-        ipv4_address: 10.0.0.2
+        ipv4_address: 10.243.0.2
   gateway:
     image: 10up/nginx-proxy
     ports:
@@ -22,7 +22,7 @@ services:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
     networks:
       wplocaldocker:
-        ipv4_address: 10.0.0.3
+        ipv4_address: 10.243.0.3
   mysql:
     image: mysql:5
     volumes:

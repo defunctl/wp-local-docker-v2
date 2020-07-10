@@ -1,19 +1,19 @@
 const commandUtils = require( './command-utils' );
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const yaml = require( 'write-yaml' );
-const inquirer = require( 'inquirer' );
+const path             = require( 'path' );
+const fs               = require( 'fs-extra' );
+const yaml             = require( 'write-yaml' );
+const inquirer         = require( 'inquirer' );
 const promptValidators = require( './prompt-validators' );
-const database = require( './database' );
-const gateway = require( './gateway' );
-const environment = require( './environment.js' );
-const wordpress = require( './wordpress' );
-const envUtils = require( './env-utils' );
-const sudo = require( 'sudo-prompt' );
-const config = require( './configure' );
-const chalk = require( 'chalk' );
-const os = require( 'os' );
-const { images } = require( './image' );
+const database         = require( './database' );
+const gateway          = require( './gateway' );
+const environment      = require( './environment.js' );
+const wordpress        = require( './wordpress' );
+const envUtils         = require( './env-utils' );
+const sudo             = require( 'sudo-prompt' );
+const config           = require( './configure' );
+const chalk            = require( 'chalk' );
+const os               = require( 'os' );
+const { images }       = require( './image' );
 
 const help = function() {
     const help = `
@@ -28,13 +28,13 @@ Creates a new docker environment interactively.
 const createEnv = async function() {
     const baseConfig = {
         // use version 2 so we can use limits
-        'version': '2.2',
+        'version' : '2.2',
         'services': {
             'memcached': {
                 'image': images['memcached'],
             },
             'nginx': {
-                'image': images['nginx'],
+                'image' : images['nginx'],
                 'expose': [
                     '80',
                     '443'
@@ -50,7 +50,7 @@ const createEnv = async function() {
                     'wplocaldocker'
                 ],
                 'environment': {
-                    'CERT_NAME': 'localhost',
+                    'CERT_NAME'   : 'localhost',
                     'HTTPS_METHOD': 'noredirect'
                 }
             }
@@ -78,23 +78,23 @@ const createEnv = async function() {
 
     const questions = [
         {
-            name: 'hostname',
-            type: 'input',
-            message: 'What is the primary hostname for your site? (Ex: docker.test)',
+            name    : 'hostname',
+            type    : 'input',
+            message : 'What is the primary hostname for your site? (Ex: docker.test)',
             validate: promptValidators.validateNotEmpty,
-            filter: promptValidators.parseHostname,
+            filter  : promptValidators.parseHostname,
         },
         {
-            name: 'addMoreHosts',
-            type: 'confirm',
+            name   : 'addMoreHosts',
+            type   : 'confirm',
             message: 'Are there additional domains the site should respond to?',
             default: false,
         },
         {
-            name: 'extraHosts',
-            type: 'input',
+            name   : 'extraHosts',
+            type   : 'input',
             message: 'Enter additional hostnames separated by spaces (Ex: docker1.test docker2.test)',
-            filter: async function( value ) {
+            filter : async function( value ) {
                 const answers = value.split( ' ' ).map( function( value ) {
                     return value.trim();
                 } ).filter( function( value ) {
@@ -108,50 +108,50 @@ const createEnv = async function() {
             }
         },
         {
-            name: 'addHttps',
-            type: 'confirm',
+            name   : 'addHttps',
+            type   : 'confirm',
             message: 'Do you want to enable HTTPS?',
             default: false,
         },
         {
-            name: 'mediaProxy',
-            type: 'confirm',
+            name   : 'mediaProxy',
+            type   : 'confirm',
             message: 'Do you want to set a proxy for media assets? (i.e. Serving /uploads/ directory assets from a production site)',
             default: false,
         },
         {
-            name: 'proxy',
-            type: 'input',
+            name   : 'proxy',
+            type   : 'input',
             message: 'Proxy URL',
             default: function( answers ) {
                 return envUtils.createDefaultProxy( answers.hostname );
             },
             validate: promptValidators.validateNotEmpty,
-            filter: promptValidators.parseProxyUrl,
-            when: function( answers ) {
+            filter  : promptValidators.parseProxyUrl,
+            when    : function( answers ) {
                 return answers.mediaProxy === true;
             }
         },
         {
-            name: 'phpVersion',
-            type: 'list',
+            name   : 'phpVersion',
+            type   : 'list',
             message: 'What version of PHP would you like to use?',
             choices: [ '7.4', '7.3', '7.2', '7.1', '7.0', '5.6' ],
             default: '7.3',
         },
         {
-            name: 'elasticsearch',
-            type: 'confirm',
+            name   : 'elasticsearch',
+            type   : 'confirm',
             message: 'Do you need Elasticsearch',
         },
         {
-            name: 'wordpress',
-            type: 'confirm',
+            name   : 'wordpress',
+            type   : 'confirm',
             message: 'Do you want to install WordPress?',
         },
         {
-            name: 'wordpressType',
-            type: 'list',
+            name   : 'wordpressType',
+            type   : 'list',
             message: 'Select a WordPress installation type:',
             choices: [
                 { name: 'Single Site', value: 'single' },
@@ -160,57 +160,57 @@ const createEnv = async function() {
                 { name: 'Core Development Version', value: 'dev' },
             ],
             default: 'single',
-            when: function( answers ) {
+            when   : function( answers ) {
                 return answers.wordpress === true;
             }
         },
         {
-            name: 'emptyContent',
-            type: 'confirm',
+            name   : 'emptyContent',
+            type   : 'confirm',
             message: 'Do you want to remove the default content?',
-            when: function( answers ) {
+            when   : function( answers ) {
                 return answers.wordpress === true;
             }
         },
         {
-            name: 'title',
-            type: 'input',
+            name   : 'title',
+            type   : 'input',
             message: 'Site Name',
             default: function( answers ) {
                 return answers.hostname;
             },
             validate: promptValidators.validateNotEmpty,
-            when: function( answers ) {
+            when    : function( answers ) {
                 return answers.wordpress === true;
             }
         },
         {
-            name: 'username',
-            type: 'input',
-            message: 'Admin Username',
-            default: 'admin',
+            name    : 'username',
+            type    : 'input',
+            message : 'Admin Username',
+            default : 'admin',
             validate: promptValidators.validateNotEmpty,
-            when: function( answers ) {
+            when    : function( answers ) {
                 return answers.wordpress === true;
             }
         },
         {
-            name: 'password',
-            type: 'input',
-            message: 'Admin Password',
-            default: 'password',
+            name    : 'password',
+            type    : 'input',
+            message : 'Admin Password',
+            default : 'password',
             validate: promptValidators.validateNotEmpty,
-            when: function( answers ) {
+            when    : function( answers ) {
                 return answers.wordpress === true;
             }
         },
         {
-            name: 'email',
-            type: 'input',
-            message: 'Admin Email',
-            default: 'admin@example.com',
+            name    : 'email',
+            type    : 'input',
+            message : 'Admin Email',
+            default : 'admin@example.com',
             validate: promptValidators.validateNotEmpty,
-            when: function( answers ) {
+            when    : function( answers ) {
                 return answers.wordpress === true;
             }
         },
@@ -234,7 +234,7 @@ const createEnv = async function() {
 
     await gateway.startGlobal();
 
-    let allHosts = [ answers.hostname ];
+    let   allHosts  = [ answers.hostname ];
     const starHosts = [];
 
     if ( answers.addMoreHosts === true ) {
@@ -256,7 +256,7 @@ const createEnv = async function() {
     baseConfig.services.nginx.environment.VIRTUAL_HOST = allHosts.concat( starHosts ).join( ',' );
 
     baseConfig.services.phpfpm = {
-        'image': images[`php${answers.phpVersion}`],
+        'image'      : images[`php${answers.phpVersion}`],
         'environment': {
             'ENABLE_XDEBUG': 'false'
         },
@@ -273,30 +273,30 @@ const createEnv = async function() {
             'wplocaldocker'
         ],
         'dns': [
-            '10.0.0.2'
+            '10.243.0.2'
         ]
     };
 
     // Unlike Mac and Windows, Docker is a first class citizen on Linux
     // and doesn't have any kind of translation layer between users and the
-    // file system. Because of this the phpfpm container will be running as the 
+    // file system. Because of this the phpfpm container will be running as the
     // wrong user. Here we setup the docker-compose.yml file to rebuild the
     // phpfpm container so that it runs as the user who created the project.
     if ( os.platform() == 'linux' ) {
         baseConfig.services.phpfpm.image = `wp-php-fpm-dev-${answers.phpVersion}-${process.env.USER}`;
         baseConfig.services.phpfpm.build = {
             'dockerfile': '.containers/php-fpm',
-            'context': '.',
-            'args': {
-                'PHP_IMAGE': images[`php${answers.phpVersion}`],
+            'context'   : '.',
+            'args'      : {
+                'PHP_IMAGE'   : images[`php${answers.phpVersion}`],
                 'CALLING_USER': process.env.USER,
-                'CALLING_UID': process.getuid()
+                'CALLING_UID' : process.getuid()
             }
         };
         baseConfig.services.phpfpm.volumes.push( `~/.ssh:/home/${process.env.USER}/.ssh:cached` );
     }
     else {
-        // the official containers for this project will have a www-data user. 
+        // the official containers for this project will have a www-data user.
         baseConfig.services.phpfpm.volumes.push( '~/.ssh:/home/www-data/.ssh:cached' );
     }
 
@@ -314,7 +314,7 @@ const createEnv = async function() {
         baseConfig.services.phpfpm.depends_on.push( 'elasticsearch' );
 
         baseConfig.services.elasticsearch = {
-            image: images['elasticsearch'],
+            image   : images['elasticsearch'],
             'expose': [
                 '9200'
             ],
@@ -323,9 +323,9 @@ const createEnv = async function() {
                 './config/elasticsearch/plugins:/usr/share/elasticsearch/plugins:cached',
                 'elasticsearchData:/usr/share/elasticsearch/data:delegated'
             ],
-            'mem_limit': '1024M',
+            'mem_limit'      : '1024M',
             'mem_reservation': '1024M',
-            'environment': {
+            'environment'    : {
                 ES_JAVA_OPTS: '-Xms450m -Xmx450m'
             }
         };
@@ -464,10 +464,10 @@ const createEnv = async function() {
 
 const command = async function() {
     switch ( commandUtils.subcommand() ) {
-        case 'help':
+        case 'help': 
             help();
             break;
-        default:
+        default: 
             await createEnv();
             break;
     }
